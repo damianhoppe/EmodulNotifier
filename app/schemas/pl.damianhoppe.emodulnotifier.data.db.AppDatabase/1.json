@@ -1,0 +1,70 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "f4a48d32b5ce9604c635650c3c5ee817",
+    "entities": [
+      {
+        "tableName": "module_settings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `moduleId` TEXT NOT NULL, `fuelEmptyNotificationsEnabled` INTEGER NOT NULL, `pumpActivationScheduleEnabled` INTEGER NOT NULL, `pumpActivationTime` INTEGER NOT NULL, `pumpShutdownScheduleEnabled` INTEGER NOT NULL, `pumpShutdownTime` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "moduleId",
+            "columnName": "moduleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fuelEmptyNotificationsEnabled",
+            "columnName": "fuelEmptyNotificationsEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpActivationScheduleEnabled",
+            "columnName": "pumpActivationScheduleEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpActivationTime",
+            "columnName": "pumpActivationTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpShutdownScheduleEnabled",
+            "columnName": "pumpShutdownScheduleEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpShutdownTime",
+            "columnName": "pumpShutdownTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f4a48d32b5ce9604c635650c3c5ee817')"
+    ]
+  }
+}

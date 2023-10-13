@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">EmodulNotifier</string>
+    <string name="notification_channel_name_fuel_check">Fuel check</string>
+    <string name="notification_channel_name_pump_mode_change">Pump mode changed\n</string>
+    <string name="fuel_supply_level">Fuel supply level</string>
+    <string name="fuel_supply_error">An error occurred while retrieving fuel supply level</string>
+    <string name="pump_mode_changed">Pump mode changed</string>
+    <string name="parallel_pumps_activated">Parallel pumps activated</string>
+    <string name="parallel_pumps_activation_failed">Parallel pumps activation failed</string>
+    <string name="summer_mode_activated">Summer mode pumps activated</string>
+    <string name="summer_mode_activation_failed">Summer mode pumps activation failed</string>
+    <string name="welcome">Welcome</string>
+    <string name="incorrect_login_password">Icorrect login or password!</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="need_login_again">You need to log in again</string>
+    <string name="modules_load_error">An unknown error occurred, please make sure you are connected to the Internet.</string>
+    <string name="notifiy_low_fuel_supply">Notify about low fuel supply</string>
+    <string name="activate_parallel_pumps">Activate parallel pumps</string>
+    <string name="activate_summer_mode">Activate summer pump mode</string>
+    <string name="logout">Logout</string>
+</resources>
