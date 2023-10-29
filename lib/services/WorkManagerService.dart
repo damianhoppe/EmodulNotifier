@@ -30,6 +30,17 @@ TaskType? taskTypeFrom(String taskTypeName) {
   return null;
 }
 
+Duration calcDelay(TimeOfDay t1, TimeOfDay t2) {
+  int diff = toMinutes(t2) - toMinutes(t1);
+  if(diff < 0) {
+    diff = 24*60 + diff;
+  }
+  return Duration(minutes: diff);
+}
+
+int toMinutes(TimeOfDay time) {
+  return time.hour * 60 + time.minute;
+}
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -132,9 +143,10 @@ class WorkmanagerService {
   void registerFuelEmptyNotificationTaskFor(ModuleSettings moduleSettings) {
     String taskName = generateTaskName([fuelEmptyNotificationTaskName, moduleSettings.moduleId]);
     Workmanager().registerPeriodicTask(taskName, taskName,
-      frequency: Duration(hours: 1),
+      frequency: const Duration(hours: 1),
       existingWorkPolicy: ExistingWorkPolicy.keep,
       inputData: {KEY_MODULE_SETTINGS_ID: moduleSettings.id, KEY_MODULE_ID: moduleSettings.moduleId},
+      constraints: Constraints(networkType: NetworkType.connected),
     );
   }
 
@@ -149,6 +161,7 @@ class WorkmanagerService {
       initialDelay: calcDelay(TimeOfDay.now(), moduleSettings.pumpActivationTime),
       existingWorkPolicy: ExistingWorkPolicy.update,
       inputData: {KEY_MODULE_SETTINGS_ID: moduleSettings.id, KEY_MODULE_ID: moduleSettings.moduleId},
+      constraints: Constraints(networkType: NetworkType.connected),
     );
   }
 
@@ -163,22 +176,11 @@ class WorkmanagerService {
       initialDelay: calcDelay(TimeOfDay.now(), moduleSettings.pumpShutdownTime),
       existingWorkPolicy: ExistingWorkPolicy.update,
       inputData: {KEY_MODULE_SETTINGS_ID: moduleSettings.id, KEY_MODULE_ID: moduleSettings.moduleId},
+      constraints: Constraints(networkType: NetworkType.connected),
     );
   }
 
   void cancelPumpShutdownTaskFor(ModuleSettings moduleSettings) {
     Workmanager().cancelByUniqueName(generateTaskName([pumpShutdownTaskName, moduleSettings.moduleId]));
-  }
-
-  Duration calcDelay(TimeOfDay t1, TimeOfDay t2) {
-    int diff = toMinutes(t2) - toMinutes(t1);
-    if(diff < 0) {
-      diff = 24*60 + diff;
-    }
-    return Duration(minutes: diff);
-  }
-
-  int toMinutes(TimeOfDay time) {
-    return time.hour * 60 + time.minute;
   }
 }
