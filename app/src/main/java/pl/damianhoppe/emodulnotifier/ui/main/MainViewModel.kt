@@ -15,6 +15,8 @@ import pl.damianhoppe.emodulnotifier.data.emodul.EmodulApi
 import pl.damianhoppe.emodulnotifier.data.emodul.model.Module
 import pl.damianhoppe.emodulnotifier.data.model.ModuleSettings
 import pl.damianhoppe.emodulnotifier.data.model.ModuleWithSettings
+import pl.damianhoppe.emodulnotifier.data.model.UserSession
+import pl.damianhoppe.emodulnotifier.data.model.isDemoAccount
 import pl.damianhoppe.emodulnotifier.exceptions.requireUserAuthenticated
 import pl.damianhoppe.emodulnotifier.utils.AuthorizationHeader
 import javax.inject.Inject
@@ -29,6 +31,7 @@ class MainViewModel @Inject constructor(
 
     val modules: MutableLiveData<Result<List<ModuleWithSettings>>> = MutableLiveData<Result<List<ModuleWithSettings>>>(null)
     val refreshStatus: MutableLiveData<Boolean> = MutableLiveData<Boolean>(false)
+    var userSession: UserSession? = null
 
     init {
         refresh()
@@ -50,8 +53,11 @@ class MainViewModel @Inject constructor(
 
     private suspend fun loadModules(): List<ModuleWithSettings> {
         var modulesFromApi: List<Module>
-        val userSession =
-            userSessionStore.getUserSession.firstOrNull() ?: throw IllegalStateException();
+        val userSession = userSessionStore.getUserSession.firstOrNull() ?: throw IllegalStateException();
+        this.userSession = userSession
+        if(userSession.isDemoAccount()) {
+            return listOf(demoModule())
+        }
         val result = emodulApi.fetchModules(
             AuthorizationHeader.Bearer(userSession.token),
             userSession.userId
@@ -79,6 +85,12 @@ class MainViewModel @Inject constructor(
         return modulesWithSettings
     }
 
+    private fun demoModule(): ModuleWithSettings {
+        val module = Module("demo", "Demo")
+        val moduleSettings = ModuleSettings.Default("demo")
+        return ModuleWithSettings(module, moduleSettings)
+    }
+
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             userSessionStore.invalidateUserSession()
@@ -92,10 +104,16 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun toggleFuelEmptyNotificationsFor(moduleWithSettings: ModuleWithSettings) {
+    private fun updateModule(moduleWithSettings: ModuleWithSettings) {
         viewModelScope.launch(Dispatchers.IO) {
             database.moduleSettingsDao().update(moduleWithSettings.settings)
         }
+    }
+
+    fun toggleFuelEmptyNotificationsFor(moduleWithSettings: ModuleWithSettings) {
+        updateModule(moduleWithSettings)
+        if(userSession.isDemoAccount())
+            return
         if(moduleWithSettings.settings.fuelEmptyNotificationsEnabled)
             workManagerService.enqueueFuelCheckWork(moduleWithSettings.module.udid)
         else
@@ -103,9 +121,9 @@ class MainViewModel @Inject constructor(
     }
 
     fun updateParallelPumpSchedule(moduleWithSettings: ModuleWithSettings) {
-        viewModelScope.launch(Dispatchers.IO) {
-            database.moduleSettingsDao().update(moduleWithSettings.settings)
-        }
+        updateModule(moduleWithSettings)
+        if(userSession.isDemoAccount())
+            return
         if(moduleWithSettings.settings.pumpActivationScheduleEnabled)
             workManagerService.enqueuePumpActivationWork(moduleWithSettings.settings)
         else
@@ -113,9 +131,9 @@ class MainViewModel @Inject constructor(
     }
 
     fun updateSummerPumpModeSchedule(moduleWithSettings: ModuleWithSettings) {
-        viewModelScope.launch(Dispatchers.IO) {
-            database.moduleSettingsDao().update(moduleWithSettings.settings)
-        }
+        updateModule(moduleWithSettings)
+        if(userSession.isDemoAccount())
+            return
         if(moduleWithSettings.settings.pumpShutdownScheduleEnabled)
             workManagerService.enqueuePumpShutdownWork(moduleWithSettings.settings)
         else

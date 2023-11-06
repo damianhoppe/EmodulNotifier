@@ -16,7 +16,10 @@ import kotlinx.coroutines.withContext
 import pl.damianhoppe.emodulnotifier.data.UserSessionStore
 import pl.damianhoppe.emodulnotifier.data.emodul.EmodulApi
 import pl.damianhoppe.emodulnotifier.data.emodul.model.LoginForm
+import pl.damianhoppe.emodulnotifier.data.model.DEMO_USER_ID
+import pl.damianhoppe.emodulnotifier.data.model.DEMO_USER_PASSWORD
 import pl.damianhoppe.emodulnotifier.data.model.UserSession
+import pl.damianhoppe.emodulnotifier.data.model.getDemoSession
 import java.lang.Exception
 import java.lang.IllegalStateException
 import java.lang.NullPointerException
@@ -62,10 +65,15 @@ class LoginViewModel @Inject constructor(): ViewModel() {
                 delay(2000)
                 if(_userLogin.value.isNullOrBlank() || _userPassword.value.isNullOrBlank())
                     throw Exception("Incorrect login or password")
-                val result = emodulApi.authenticate(LoginForm(_userLogin.value!!, _userPassword.value!!)).execute().body()
-                if(result == null || !result.authenticated)
-                    throw Exception("Incorrect login or password")
-                val userSession = UserSession(result.user_id, result.token)
+                val userSession: UserSession
+                if(_userLogin.value == DEMO_USER_ID && _userPassword.value == DEMO_USER_PASSWORD) {
+                    userSession = getDemoSession()
+                }else {
+                    val result = emodulApi.authenticate(LoginForm(_userLogin.value!!, _userPassword.value!!)).execute().body()
+                    if(result == null || !result.authenticated)
+                        throw Exception("Incorrect login or password")
+                    userSession = UserSession(result.user_id, result.token)
+                }
                 userSessionStore.saveUserSession(userSession)
                 viewModelScope.launch {
                     _loginProcessingState.value = LoginProcessingState.SUCCESS
