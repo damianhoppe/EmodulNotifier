@@ -12,7 +12,9 @@ import okhttp3.internal.http.ExchangeCodec
 import pl.damianhoppe.emodulnotifier.NotificationsService
 import pl.damianhoppe.emodulnotifier.R
 import pl.damianhoppe.emodulnotifier.data.UserSessionStore
+import pl.damianhoppe.emodulnotifier.data.db.AppDatabase
 import pl.damianhoppe.emodulnotifier.data.emodul.EmodulApiService
+import pl.damianhoppe.emodulnotifier.data.model.DEFAULT_FUEL_LEVEL_THRESHOLD_FOR_NOTIFICATION
 import pl.damianhoppe.emodulnotifier.utils.AuthorizationHeader
 import pl.damianhoppe.emodulnotifier.work.WorkManagerService
 
@@ -23,6 +25,7 @@ class FuelCheckWorker @AssistedInject constructor(
     private val emodulApiService: EmodulApiService,
     private val notificationsService: NotificationsService,
     private val userSessionStore: UserSessionStore,
+    private val database: AppDatabase,
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -35,7 +38,8 @@ class FuelCheckWorker @AssistedInject constructor(
             notificationsService.showNotification(applicationContext.getString(R.string.fuel_supply_level), applicationContext.getString(R.string.fuel_supply_error), 0)
             return Result.failure();
         }
-        if(fuelSupply <= 15) {
+        val fuelLevelThreshold = database.moduleSettingsDao().getByModuleId(moduleId)?.fuelLevelThresholdForNotification ?: DEFAULT_FUEL_LEVEL_THRESHOLD_FOR_NOTIFICATION
+        if(fuelSupply <= fuelLevelThreshold) {
             notificationsService.showNotification(applicationContext.getString(R.string.fuel_supply_level), "$fuelSupply%", 0)
         }
         return Result.success()

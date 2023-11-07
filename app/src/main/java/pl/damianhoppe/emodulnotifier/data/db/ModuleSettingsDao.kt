@@ -13,6 +13,9 @@ interface ModuleSettingsDao {
     @Query("SELECT * FROM module_settings")
     fun getAll(): List<ModuleSettings>
 
+    @Query("SELECT * FROM module_settings WHERE moduleId = :moduleId")
+    fun getByModuleId(moduleId: String): ModuleSettings?
+
     @Update
     fun update(moduleSettings: ModuleSettings)
 

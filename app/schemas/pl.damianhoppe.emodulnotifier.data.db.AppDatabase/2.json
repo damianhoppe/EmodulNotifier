@@ -1,0 +1,77 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "8e96a1c2cf42ad77aff4ba577c8b53ea",
+    "entities": [
+      {
+        "tableName": "module_settings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `moduleId` TEXT NOT NULL, `fuelEmptyNotificationsEnabled` INTEGER NOT NULL, `pumpActivationScheduleEnabled` INTEGER NOT NULL, `pumpActivationTime` INTEGER NOT NULL, `pumpShutdownScheduleEnabled` INTEGER NOT NULL, `pumpShutdownTime` INTEGER NOT NULL, `fuelLevelThresholdForNotification` INTEGER NOT NULL DEFAULT 15)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "moduleId",
+            "columnName": "moduleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fuelEmptyNotificationsEnabled",
+            "columnName": "fuelEmptyNotificationsEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpActivationScheduleEnabled",
+            "columnName": "pumpActivationScheduleEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpActivationTime",
+            "columnName": "pumpActivationTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpShutdownScheduleEnabled",
+            "columnName": "pumpShutdownScheduleEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pumpShutdownTime",
+            "columnName": "pumpShutdownTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fuelLevelThresholdForNotification",
+            "columnName": "fuelLevelThresholdForNotification",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "15"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8e96a1c2cf42ad77aff4ba577c8b53ea')"
+    ]
+  }
+}

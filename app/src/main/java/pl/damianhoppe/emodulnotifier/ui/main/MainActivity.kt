@@ -1,8 +1,11 @@
 package pl.damianhoppe.emodulnotifier.ui.main
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
@@ -58,6 +61,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import pl.damianhoppe.emodulnotifier.Navigator
 import pl.damianhoppe.emodulnotifier.R
 import pl.damianhoppe.emodulnotifier.data.UserSessionStore
+import pl.damianhoppe.emodulnotifier.data.model.FUEL_LEVEL_MAX
+import pl.damianhoppe.emodulnotifier.data.model.FUEL_LEVEL_MIN
 import pl.damianhoppe.emodulnotifier.data.model.ModuleWithSettings
 import pl.damianhoppe.emodulnotifier.exceptions.UnAuthenticatedUserException
 import pl.damianhoppe.emodulnotifier.ui.theme.EmodulNotifierTheme
@@ -115,9 +120,27 @@ class MainActivity : AppCompatActivity() {
         }
         timePicker.show(supportFragmentManager, "TimePicker")
     }
+
+    fun openIntPicker(initialValue: Int, callback: (Int) -> Unit) {
+        val view = layoutInflater.inflate(R.layout.dialog_number_picker, null)
+
+        val numberPicker = view.findViewById<NumberPicker>(R.id.picker)
+        numberPicker.minValue = FUEL_LEVEL_MIN
+        numberPicker.maxValue = FUEL_LEVEL_MAX
+        numberPicker.value = initialValue
+
+        val builder = AlertDialog.Builder(this)
+            .setView(view)
+            .setPositiveButton("Ok") { _, _ ->
+                callback.invoke(numberPicker.value)
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+            }
+        builder.create().show()
+    }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainView(activity: MainActivity) {
     val refreshing by activity.viewModel.refreshStatus.observeAsState()
@@ -210,10 +233,13 @@ fun ModuleSettingsView(activity: MainActivity, moduleWithSettings: ModuleWithSet
     val settings = moduleWithSettings.settings
 
     var fuelEmptyAlert by remember(key1 = "1-${module.udid}") { mutableStateOf(settings.fuelEmptyNotificationsEnabled) }
+    var fuelLevelThresholdForNotification by remember(key1 = "1-${module.udid}") { mutableStateOf(settings.fuelLevelThresholdForNotification) }
     var pumpOn by remember(key1 = "2-${module.udid}") { mutableStateOf(settings.pumpActivationScheduleEnabled) }
     var pumpOnTime by remember(key1 = "3-${module.udid}") { mutableIntStateOf(settings.pumpActivationTime) }
     var pumpOff by remember(key1 = "4-${module.udid}") { mutableStateOf(settings.pumpShutdownScheduleEnabled) }
     var pumpOffTime by remember(key1 = "5-${module.udid}") { mutableIntStateOf(settings.pumpShutdownTime) }
+
+    val disabledAlpha = 0.4f;
 
     Column(
         modifier = Modifier
@@ -243,6 +269,20 @@ fun ModuleSettingsView(activity: MainActivity, moduleWithSettings: ModuleWithSet
                 }
             )
         }
+        TextButton(
+            modifier = Modifier
+                .align(Alignment.End)
+                .graphicsLayer {
+                    alpha = if(fuelEmptyAlert) 1f else disabledAlpha
+                },
+            onClick = { activity.openIntPicker(fuelLevelThresholdForNotification) {
+                settings.fuelLevelThresholdForNotification = it
+                fuelLevelThresholdForNotification = settings.fuelLevelThresholdForNotification
+                activity.viewModel.updateSummerPumpModeSchedule(moduleWithSettings)
+            } }
+        ) {
+            Text("≤ $fuelLevelThresholdForNotification%")
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -262,7 +302,7 @@ fun ModuleSettingsView(activity: MainActivity, moduleWithSettings: ModuleWithSet
             modifier = Modifier
                 .align(Alignment.End)
                 .graphicsLayer {
-                    alpha = if(pumpOn) 1f else 0.4f
+                    alpha = if(pumpOn) 1f else disabledAlpha
                 },
             onClick = { activity.openTimePickerDialog(pumpOnTime) {
                 settings.pumpActivationTime = it
@@ -291,7 +331,7 @@ fun ModuleSettingsView(activity: MainActivity, moduleWithSettings: ModuleWithSet
             modifier = Modifier
                 .align(Alignment.End)
                 .graphicsLayer {
-                    alpha = if(pumpOff) 1f else 0.4f
+                    alpha = if(pumpOff) 1f else disabledAlpha
                 },
             onClick = { activity.openTimePickerDialog(pumpOffTime) {
                 settings.pumpShutdownTime = it
