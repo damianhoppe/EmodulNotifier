@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
@@ -129,7 +130,7 @@ class MainActivity : AppCompatActivity() {
         numberPicker.maxValue = FUEL_LEVEL_MAX
         numberPicker.value = initialValue
 
-        val builder = AlertDialog.Builder(this)
+        val builder = MaterialAlertDialogBuilder(this)
             .setView(view)
             .setPositiveButton("Ok") { _, _ ->
                 callback.invoke(numberPicker.value)
